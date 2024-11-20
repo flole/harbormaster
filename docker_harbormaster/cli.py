@@ -264,6 +264,7 @@ class App:
         """
         self.id: str = id
         self.enabled: bool = configuration.get("enabled", True)
+        self.clean_start: bool = configuration.get("clean_start", True)
         self.url: str = configuration["url"]
         cfn = configuration.get("compose_config", ["docker-compose.yml"])
         if isinstance(cfn, str):
@@ -658,9 +659,11 @@ def process_config(configuration: Configuration, force_restart: bool = False) ->
 
             parameters_changed = app.check_parameter_changes()
 
+            app_configuration_changed = updated_repo or parameters_changed
+
             # The app needs to be restarted, or is not enabled, so stop it.
             if app.repo_dir_exists and (
-                updated_repo or parameters_changed or force_restart or not app.enabled
+                (app_configuration_changed and app.clean_start) or force_restart or not app.enabled
             ):
                 click.echo(f"{app.id}: Stopping...")
                 app.stop()
@@ -669,7 +672,7 @@ def process_config(configuration: Configuration, force_restart: bool = False) ->
                 stopped = False
 
             # The app is not running and it should be, so start it.
-            if app.enabled and (stopped or not app.is_running()):
+            if app.enabled and (stopped or app_configuration_changed or not app.is_running()):
                 app.start()
                 click.echo(f"{app.id}: Starting...")
             else:

@@ -11,6 +11,7 @@ apps:
   myapp:
     url: https://github.com/someuser/somerepo.git
     branch: main
+    clean_start: false
     environment:
       FOO: bar
       MYVAR: 1
@@ -36,6 +37,7 @@ apps:
   - `myapp`: The name of the application. It can be anything you want.
     - `url`: The git repository URL to clone.
     - `branch`: The branch to deploy.
+    - `clean_start`: If set to `false`, the app will not be shutdown prior to applying changes. 
     - `environment`: The environment variables to run Compose with.
     - `environment_file`: A file to load environment variables from. The file must
       consist of lines in the form of key=value. The filename is relative to the
